@@ -66,6 +66,16 @@ Tested against: proving `True` under the name `main`; adding an axiom; `#eval`
 at build time; editing the statement; a `sorry` behind a nested comment; the
 unfinished stub; and the attack that broke the first version of this guard,
 a macro in the proof library that rewrites the statement (Stage 8, hole 7).
+And a nastier one: the library *in the trusted tree itself* is compromised,
+with macros that rewrite every `example` and `#assert_axioms` in the audit
+file, so the in-Lean audit builds cleanly and prints a forged "axioms OK".
+The external audit still says:
+
+```
+REJECT (external audit):
+  - REJECTED: Lab.main has type True, expected exactly Lab.Statement
+```
+
 All are rejected; the honest proof is accepted:
 
 ```

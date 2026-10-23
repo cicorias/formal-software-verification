@@ -29,6 +29,13 @@ jobs:
             echo "::error::a lesson or solution uses sorry"; exit 1
           fi
 
+      - name: Headline theorems use only the standard axioms (external audit)
+        run: |
+          lake env lean --run tools/AxCheck.lean Solutions \
+            Metal.sum_never_crashes Metal.Trust.sum_correct Metal.buggy_violates_spec \
+            Metal.S03.decode_encode Metal.S07Solution.fixed_never_crashes Metal.S08Ex.e8_2 \
+            Metal.S06Ex.e6_1 Metal.S06Ex.e6_3 Metal.S06Ex.e6_4
+
       - name: Lab frozen files are intact
         run: python3 tools/proof_guard.py --frozen-only
 

@@ -1,4 +1,5 @@
 import Lab.Spec
+import Metal.S06_SymExec
 
 /-!
 # Lab proof — the agent's workspace

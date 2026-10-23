@@ -57,7 +57,7 @@ Combinators: `t <;> u` (u on every goal t made), `first | t | u`, `repeat t`,
 7. `#print axioms`: only `propext`, `Classical.choice`, `Quot.sound`.
 
 Gotchas: state facts in simp-normal form (`input.tail`, `j + 1`,
-`4294967295#32`); pass `input ≠ []`; give exit codes explicitly if `sym`
+`4294967295#32`); pass `input ≠ []` if a goal still says `if input = [] then`; give exit codes explicitly if `sym`
 leaves `?m`; if `lake build` hangs but the editor didn't, checkpoint the state.
 
 ## Reading an audit

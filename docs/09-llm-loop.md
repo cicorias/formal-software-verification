@@ -19,43 +19,59 @@
   └──────────────┘   errors, goals    └────────────────────┘ ── REJECT ──▶ retry
 ```
 
-The LLM does search. The guard decides. A human reviews three small files
-once and never reads the proof.
+The LLM does search. The guard decides. A human reviews the frozen files once
+and never reads the proof. The one rule the whole design follows: **nothing
+the prover writes may influence the check, except the one file it's supposed
+to write.**
 
 ## The guard (`tools/proof_guard.py`)
 
-Three checks, in this order:
+Six steps:
 
-1. **Frozen files unchanged.** SHA-256 of `Lab/Spec.lean`, `Lab/Audit.lean`,
-   `Metal/S05_Machine.lean`, `Metal/Guard.lean` must match `Lab/guard.json`.
-   (A human runs `--freeze` after reviewing a change; an agent never should.)
-2. **Proof hygiene, before building anything.** The editable file may not
-   contain `sorry`/`admit`/`axiom`, `native_decide`/`bv_decide`, code that runs
-   at build time (`#eval`, `run_cmd`, `initialize`), new syntax or macros,
-   `unsafe`/`implemented_by`, or imports outside `Lab.Spec`/`Metal.*`.
-   Comments are stripped first (nested `/- -/` too), so prose can't trip it
-   and code can't hide in it.
-   **Why check before building?** Because *building a Lean file runs code*.
-   `#eval` and `initialize` execute at compile time. A proof file from an
-   untrusted source is untrusted code; treat your build like CI for a PR from
-   a stranger.
-3. **The checker.** `lake build Lab.Audit` must succeed. `Audit.lean` contains
+1. **Clean room.** `git archive <base>` (default `HEAD`; in CI, a ref the
+   prover can't push to, like `origin/main`) into a fresh temp directory, then
+   copy in **only** the candidate `Lab/Proof.lean`. Anything else the agent
+   touched (the library, the spec, `guard.json`, the guard itself, a lakefile,
+   cached `.olean` files) doesn't exist in there.
+2. **Pins.** The frozen files (`Lab/Spec.lean`, `Lab/Audit.lean`, the model,
+   the guard, `tools/AxCheck.lean`, the lakefile) must match the SHA-256s in
+   `Lab/guard.json`. That's a tripwire for "someone changed the reviewed files
+   without re-reviewing." A human runs `--freeze` after reviewing a change; an
+   agent never should. Frozen files edited in the working tree are reported
+   too, as a sign the agent didn't follow the rules.
+3. **Hygiene, before building anything.** The candidate may not contain
+   `sorry`/`admit`/`axiom`, `native_decide`/`bv_decide`, code that runs at
+   build time (`#eval`, `run_cmd`, `initialize`), new syntax, macros,
+   elaborators or simprocs, attributes other than `simp`, `unsafe`/`partial`/
+   `opaque`/`implemented_by`, or imports outside `Lab.Spec`/`Metal.*`. Comments
+   are stripped first (nested `/- -/` too).
+   **Why before building?** Because *building a Lean file runs code*.
+   An untrusted proof file is untrusted code; treat your build like CI for a
+   PR from a stranger.
+4. **Build** `Lab.Audit` from scratch in the clean room. `Audit.lean` has
+   `example : Lab.Statement := Lab.main` and `#assert_axioms Lab.main`, which
+   give fast, readable errors. They are not the final word: `Audit.lean`
+   imports the proof, so it's parsed with whatever syntax the proof's imports
+   define (Stage 8, hole 7).
+5. **External audit.** `lake env lean --run tools/AxCheck.lean Lab.Proof
+   Lab.main:Lab.Statement` runs a *separate program* that loads the compiled
+   proof at run time, checks that `Lab.main`'s type is exactly the constant
+   `Lab.Statement`, and walks every definition it depends on looking for
+   axioms. Nothing in the proof can change how this program is parsed, and it
+   doesn't trust the per-module axiom cache.
+6. **Kernel replay.** `leanchecker Lab.Proof` re-runs every declaration in the
+   proof module through Lean's kernel.
 
-   ```lean
-   example : Lab.Statement := Lab.main     -- exactly the frozen statement
-   #assert_axioms Lab.main                -- only propext, Classical.choice, Quot.sound
-   ```
-   `#assert_axioms` is ~15 lines of Lean metaprogramming in `Metal/Guard.lean`
-   (it calls `collectAxioms`).
-
-It was tested against six attacks: proving `True` under the name `main`, adding
-an axiom, `#eval` at build time, editing the statement to `input.length < 2`, a
-`sorry` behind a nested comment, and the stub itself. All six were rejected,
-and the honest proof was accepted:
+Tested against: proving `True` under the name `main`; adding an axiom; `#eval`
+at build time; editing the statement; a `sorry` behind a nested comment; the
+unfinished stub; and the attack that broke the first version of this guard,
+a macro in the proof library that rewrites the statement (Stage 8, hole 7).
+All are rejected; the honest proof is accepted:
 
 ```
-ACCEPT: Lab.main proves the frozen statement, using only the standard axioms.
-   axioms OK: Lab.main uses only [propext, Classical.choice, Quot.sound]
+ACCEPT: Lab.main proves the frozen Lab.Statement (trusted tree: HEAD).
+   axioms OK: Lab.main uses only [propext, Quot.sound, Classical.choice]
+   kernel replay (leanchecker): OK
 ```
 
 ## The lab task
@@ -147,8 +163,8 @@ that regenerates a whole file per round.
 
 ## Check yourself
 
-1. Which of Stage 8's six holes does the guard close? Which can't it close, and
-   why?
+1. Which of Stage 8's seven holes does the guard close? Which can't it close,
+   and why?
 2. Why must the guard check the *source* for `#eval` instead of relying on the
    axiom audit?
 3. The agent's proof is accepted. What, concretely, did a human have to review

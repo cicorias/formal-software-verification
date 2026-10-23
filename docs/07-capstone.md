@@ -48,7 +48,7 @@ once, `harness (reject : Instr)`, and instantiates it twice.
 ## Step 1: run it
 
 The `#eval`s: `[]` → 0, `[2,10,20]` → 30, `[5,10,20]` → 0 (rejected),
-`[1]` → `CRASH: badRead 0x10001` on the buggy one and `exit(0)` on the fixed
+`[1]` → `CRASH: Metal.Fault.badRead 0x00010001#32` (address 0x10001) on the buggy one and `exit(0)` on the fixed
 one. Use `trace buggyProg [1]` to watch it happen.
 
 ## Step 2: try to prove the buggy one, and get stuck
@@ -100,8 +100,9 @@ Hints that will save you time:
 
 * Don't learn the value of `n`. Keep it as the symbolic byte
   `(load input).mem inputBase` and case-split on its `toNat`.
-* `simp` rewrites `BitVec.ofNat 32 input.length == 0` into `input = []`, so
-  you need `input ≠ []` as a fact for `sym`.
+* On some paths `simp` rewrites the `size == 0` test into `input = []` (via
+  `List.length_eq_zero`) before it can use your `ofNat … ≠ 0` fact. If a goal
+  still contains `if input = [] then …`, pass `hnil : input ≠ []` to `sym`.
 * If `sym` leaves `0#32 = ?m`, supply the exit code explicitly.
 * Count steps with `trace fixedProg [2, 10, 20]`.
 

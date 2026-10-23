@@ -9,7 +9,8 @@ what you think, about the machine you think, is on you, and that part needs a
 human.
 
 This stage is the most important one for an architect. You'll break your own
-proofs six ways, each with code that compiles.
+proofs six ways, each with code that compiles, and meet a seventh that broke
+this course's own tooling.
 
 ## Your trusted computing base
 
@@ -96,8 +97,10 @@ is your audit:
 ```
 
 The only acceptable answer for this course's theorems is `[propext,
-Classical.choice, Quot.sound]` (Lean's standard three). The lesson files
-enforce that with `#guard_msgs`, and Stage 9's guard enforces it on LLM output.
+Classical.choice, Quot.sound]` (Lean's standard three). Key lesson theorems
+fail the build otherwise (`#guard_msgs`), CI audits the headline theorems with
+`tools/AxCheck.lean`, and Stage 9's guard enforces it on LLM output.
+(Exception, on purpose: Stage 4's bit tricks use `bv_decide`.)
 
 ### 6. The binary isn't the binary
 
@@ -107,6 +110,41 @@ ELF (`tools/elf_snapshot.py` in theorem-labs), decodes it with a decoder that
 is part of the trusted model, and names the binary by SHA-256 in the statement.
 "We proved something about a binary we don't ship" is a real failure mode:
 **pin the artefact.**
+
+### 7. The statement is parsed by the prover's code
+
+This one was found in review of this very course, against an earlier version
+of the Stage 9 guard. The lab's statement file imported the proof library
+(`S06_SymExec.lean`), which wasn't pinned. Lean files can define syntax. So:
+
+```lean
+-- appended to Metal/S06_SymExec.lean by a hypothetical malicious prover
+macro_rules | `(∀ $_x:ident : List Byte, $_b) => `(True)
+```
+
+Now every `∀ input : List Byte, …` *parsed after this import*, including the
+lab's frozen statement, means `True`. `theorem main : Statement := trivial`
+was accepted, the axiom audit said "uses only []", and the guard printed
+ACCEPT. Every check passed, because every check was itself Lean code parsed in
+the attacker's syntax.
+
+The kernel was never fooled: it correctly checked a proof of `True`. The
+*statement* was changed underneath it. Defences, now in the repo:
+
+* **Statements import only trusted files.** `Lab/Spec.lean` imports only the
+  machine model.
+* **Check in a clean room.** The guard copies the single candidate file into a
+  fresh export of the trusted git tree, so edits to the library, the spec, the
+  pins, the guard or cached build files simply don't exist there.
+* **Audit from outside.** The final type and axiom check (`tools/AxCheck.lean`)
+  is a separate program that loads the *compiled* proof. It is never parsed
+  with the proof's syntax, and it walks the dependencies itself instead of
+  trusting cached metadata. `leanchecker` then replays the proof through the
+  kernel.
+
+The general lesson: **a checker that runs inside the thing it checks can be
+steered by it.** That's true of test frameworks, linters, CI scripts, and
+LLM-graded evaluations too.
 
 ## The audit checklist
 
@@ -120,6 +158,8 @@ Use it on every proof, yours or an AI's. Notice you never read the proof.
 5. **`#print axioms`**: only the standard three.
 6. **What does the model leave out?** Threads, signals, the libc you link, the
    ISA you deploy on, the hardware.
+7. **Where was the statement parsed, and where did the audit run?** Neither
+   should be somewhere the prover could write.
 
 ## Exercises (`Exercises/S08_Trust.lean`)
 
@@ -150,7 +190,7 @@ longer match.
    in the proof?
 3. Your vendor says "formally verified, memory-safe." What five questions do
    you ask?
-4. Which of the six holes can tooling catch automatically, and which need a
+4. Which of the seven holes can tooling catch automatically, and which need a
    human? (Stage 9 builds the tooling.)
 
 Next: **[09 — The LLM in the loop](09-llm-loop.md)**.

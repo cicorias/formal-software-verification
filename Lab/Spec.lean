@@ -1,4 +1,4 @@
-import Metal.S06_SymExec
+import Metal.S05_Machine
 
 /-!
 # Lab statement — FROZEN
@@ -7,6 +7,11 @@ import Metal.S06_SymExec
 `tools/proof_guard.py` rejects any change. This is the only part of the
 lab a human has to read and trust: the program, the reference function,
 and the theorem statement. Everything in `Lab/Proof.lean` is untrusted.
+
+It imports *only* the trusted machine model. A statement must never be
+parsed in the presence of untrusted code: an imported library can define
+notation or macros that change what the text below means (see docs/08,
+hole 7).
 
 The task: prove that clang's `count_zeros` (see `c/examples.c`), compiled to
 RISC-V and run by our process model, exits with exactly the number of zero

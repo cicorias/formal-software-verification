@@ -133,7 +133,9 @@ The hardest part of formal verification is usually writing the spec. What does
 
 * OSS-Fuzz already has thousands of harnesses like
   `int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)`.
-* Each one, compiled with AddressSanitizer, crashes on any memory error, and
+* Each one, compiled with AddressSanitizer, crashes on the memory errors ASan
+  detects (out-of-bounds accesses into redzones, use-after-free, double free…;
+  not uninitialised reads, and not overflows inside a single object), and
   many also `abort()` when a property fails: round-trip
   (`decompress(compress(x)) == x`), idempotence, agreement between two
   implementations.

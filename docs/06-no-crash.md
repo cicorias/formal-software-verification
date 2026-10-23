@@ -116,6 +116,14 @@ the article's shared proof library (`theories/Common/` in theorem-labs) can
 be written and extended by AI: the article's "17% fewer tokens with a shared
 workspace" is agents reusing exactly this kind of file.
 
+One caveat, which Stage 8 turns into an attack: "untrusted" means *its proofs*
+can't fool the kernel. But a Lean file is also code that runs in your
+elaborator, and can define notation and macros. If a theorem *statement* is
+parsed with such a file imported, the library can change what the statement
+says. So statements should import only trusted files (the lab's `Spec.lean`
+imports only the model), and audits should run where the library can't reach
+them (Stage 9's guard).
+
 ## Walk-through
 
 Read `Metal/S06_NoCrash.lean` top to bottom with the infoview open:
@@ -126,8 +134,10 @@ Read `Metal/S06_NoCrash.lean` top to bottom with the infoview open:
 * **Step 2** — `loop_iter`. Two cases on `i + 1 = len`. In each, put the cursor
   after `sym […]` and look at what's left. In the "continue" case, the
   invariant at `i+1` is proved field by field (`constructor <;> sym […]`).
-* **Step 3** — `loop_all`: induction on iterations remaining, exactly like
-  `sumAcc_eq` in Stage 2, `generalizing` the iteration index and the machine.
+* **Step 3** — `loop_all`: induction on iterations remaining. The statement
+  quantifies over the iteration index and the machine *inside* (`∀ k i m, …`),
+  so the induction hypothesis works for any `i` and `m`: the same move as
+  `generalizing acc` in Stage 2's `sumAcc_eq`.
 * **Steps 4–5** — epilogue, then the theorem, glued with `run_add_of_running`.
 * The last line: `#guard_msgs in #print axioms sum_never_crashes`, which *fails
   the build* unless the proof uses only `propext`, `Classical.choice`,

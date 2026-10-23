@@ -68,7 +68,8 @@ theorem n_facts (b : Byte) (len : Nat) (hlen : len < maxInput) :
 
 /-- The capstone. Hints:
 * You'll need `input ≠ []` and `BitVec.ofNat 32 input.length ≠ 0#32` for the
-  non-empty case (simp turns `ofNat len == 0` into `input = []`).
+  non-empty case (on some paths simp rewrites the size test into `input = []`;
+  if you see `if input = [] then …` left over, pass `input ≠ []`).
 * `inInput input.length inputBase = true` (from `inInput_of_lt` at 0).
 * Don't try to learn the value of `n`: work with the byte
   `(load input).mem inputBase` symbolically, and case-split on

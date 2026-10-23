@@ -19,3 +19,4 @@ name = "Solutions"
 # Build the audit with `lake build Lab.Audit`, or run `python3 tools/proof_guard.py`.
 [[lean_lib]]
 name = "Lab"
+

@@ -26,7 +26,8 @@ Design choices, and what they cost us (all deliberate, all revisited in Stage 8)
   our AddressSanitizer. The real ASan has redzones around each allocation;
   we have "only the input buffer is readable".
 * One hart, no interrupts, no CSRs, no misaligned-access subtleties
-  (we only have byte loads/stores and word loads/stores with no alignment checks).
+  (we only have byte loads and stores: `lbu` and `sb`; adding `lw`/`sw` is a
+  suggested project in docs/10).
 * The only syscall is `exit` (a7 = 93, the real Linux RISC-V number).
   Any other `ecall` is a fault: "the model does not cover this". The real model
   calls that `unmodeled`.

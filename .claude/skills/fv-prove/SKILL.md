@@ -11,7 +11,9 @@ decides whether it counts. Your output is worthless unless the guard says ACCEPT
 
 ## Ground rules
 - Read the statement in `Lab/Spec.lean`. Do not edit it, `Lab/Audit.lean`,
-  `Lab/guard.json`, or anything in `Metal/`. Write only `Lab/Proof.lean`.
+  `Lab/guard.json`, `tools/`, or anything in `Metal/`. Write only
+  `Lab/Proof.lean`: the guard checks it in a clean copy of the committed tree,
+  so edits anywhere else are ignored anyway (and reported).
 - No `sorry`, `axiom`, `native_decide`, `bv_decide`, `#eval`, macros or new
   syntax. Imports: `Lab.Spec` and `Metal.*` only.
 - Don't read `Solutions/` for the lab; there is no lab solution there anyway.
@@ -41,5 +43,6 @@ decides whether it counts. Your output is worthless unless the guard says ACCEPT
 - If the editor is fast but `lake build` hangs: the kernel is re-deriving
   register values through `load` with a big constant. Checkpoint the state into
   an `∃ m, …` lemma and continue from the abstract `m`.
-- `simp` turns `BitVec.ofNat 32 len == 0` into `input = []`: pass `input ≠ []`.
+- If a goal still contains `if input = [] then …` (simp sometimes rewrites the
+  size test that way), pass `input ≠ []` alongside `BitVec.ofNat 32 len ≠ 0`.
 - Exit codes: if `sym` leaves `x = ?m`, give the code explicitly.

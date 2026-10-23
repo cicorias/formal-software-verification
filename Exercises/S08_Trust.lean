@@ -41,7 +41,8 @@ It changed the length check to `bgeu x0, x0` (always taken). Its proof that
 `agentProg` never crashes is perfectly valid. Show that the patch changed the
 program's behaviour on a well-formed input: find one where the real fix and
 the agent's fix return different exit codes, and prove it.
-(`exitCode` is in `S05_Playground.lean`; `decide` or `rfl` will check it.) -/
+(`exitCode` is in `S05_Playground.lean`; `decide` will check a `≠` between
+concrete values. `rfl` won't: it proves equalities only.) -/
 def agentProg : Program := harness (bgeu zero zero 36)
 
 theorem e8_1c : exitCode fixedProg [0] ≠ exitCode agentProg [0] := by

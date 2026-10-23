@@ -78,7 +78,7 @@ follows" but none does, and `n = size` slips past the buggy check. -/
 #eval (run buggyProg 1000 (load [])).show            -- exit(0)
 #eval (run buggyProg 1000 (load [2, 10, 20])).show   -- exit(30)
 #eval (run buggyProg 1000 (load [5, 10, 20])).show   -- exit(0): rejected, n > size
-#eval (run buggyProg 1000 (load [1])).show           -- CRASH: badRead 65537 (= 0x10001)
+#eval (run buggyProg 1000 (load [1])).show           -- CRASH: Metal.Fault.badRead 0x00010001#32
 #eval (run fixedProg 1000 (load [1])).show           -- exit(0)
 
 /-! ## A crash is final

@@ -29,9 +29,12 @@ before giving the answer; point at the stuck goal and ask what it needs.
 ## Rules
 - Never edit a statement to make a proof go through. In `Exercises/`, only
   replace `sorry` (Stage 4 exercises may add `¬`, as instructed there).
-- Never edit `Lab/Spec.lean`, `Lab/Audit.lean`, `Lab/guard.json`,
-  `Metal/S05_Machine.lean` or `Metal/Guard.lean` unless the human explicitly asks;
-  if the model changes, re-run `python3 tools/proof_guard.py --freeze` only on request.
+- Never edit the files pinned in `Lab/guard.json` (the lab spec and audit, the
+  machine model, `Metal/Guard.lean`, `tools/AxCheck.lean`, `tools/proof_guard.py`,
+  `lakefile.toml`) or `Lab/guard.json` itself unless the human explicitly asks;
+  re-run `python3 tools/proof_guard.py --freeze` only on request.
+- Theorem statements must not import untrusted code (it can redefine syntax);
+  see docs/08, hole 7.
 - No `native_decide`/`bv_decide` in machine-level proofs (they add axioms); use `bv_omega`.
 - If `lake build` hangs on a proof the editor accepted quickly, it's the kernel:
   checkpoint the machine state (see docs/06, "When the kernel is slow").

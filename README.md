@@ -62,6 +62,7 @@ Also: [setup](docs/setup.md) · [cheat sheet](docs/cheatsheet.md).
 
 ```sh
 curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh   # Lean toolchain manager
+source ~/.elan/env          # or open a new shell, so `lake` is on your PATH
 git clone https://github.com/cicorias/formal-software-verification && cd formal-software-verification
 lake build                  # all lessons + solutions (≈1 min first time)
 code .                      # VS Code + the "lean4" extension; open Metal/S01_LeanForC.lean
@@ -91,7 +92,7 @@ docs/          the narrative, one chapter per stage
 Metal/         lessons (Lean). S05_Machine.lean is the TRUSTED machine model;
                S06_SymExec.lean is the untrusted proof library (the `sym` tactic)
 Exercises/     your workspace: 70 holes across 8 stages
-Solutions/     reference solutions (CI-checked: no sorry, standard axioms only)
+Solutions/     reference solutions (CI-checked: no sorry; headline theorems axiom-audited)
 Lab/           Stage 9: frozen Spec.lean + Audit.lean, editable Proof.lean
 c/             the C sources, a random fuzzer, `make asm` / `make demo`
 rocq/          Stage 10: Basics, a relational machine, exercises (Rocq 9)
@@ -108,7 +109,10 @@ tools/         proof_guard.py (accept/reject a proof), llm_prove.py (API loop de
 * `Metal.S08Ex.e8_2` — the fixed harness returns exactly the payload sum, all inputs.
 * `Metal.S03.decode_encode` — RLE round-trip, all inputs (the buggy encoder passes
   200,000 random tests and is disproved by one).
-* All using only Lean's three standard axioms, enforced at build time.
+* All of these use only Lean's three standard axioms. CI audits them with
+  `tools/AxCheck.lean`, and several lesson files also fail the build otherwise
+  (`#guard_msgs`). The Stage 4 bit-trick theorems deliberately use `bv_decide`,
+  which adds a native-code axiom; docs/04 explains the trade.
 
 ## Using Claude Code as a tutor
 

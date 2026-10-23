@@ -28,7 +28,7 @@ Stage 6-style proof in Rocq, written in the relational style the real model uses
 | `rfl` | `reflexivity` | |
 | `simp [f]` | `simpl`, `unfold f`, `rewrite`, `autorewrite` | Rocq's `simpl` only computes; rewriting is explicit |
 | `omega` | `lia` | |
-| `decide` | `decide`, `vm_compute`, `reflexivity` | |
+| `decide` | `vm_compute; reflexivity` (closed facts), `lia` (arithmetic) | Rocq's `decide` is `decide equality`, a different tactic |
 | `induction xs with \| nil => … \| cons x xs ih => …` | `induction xs as [\| x xs IH]` | |
 | `induction xs generalizing acc` | `induction xs; intros acc` (state `acc` after `xs`) | |
 | `cases h` · `obtain ⟨a, b⟩ := h` | `destruct h` · `destruct h as [a b]` | |

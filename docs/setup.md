@@ -8,6 +8,7 @@ for Stage 10; a C compiler only for the `c/` demos.
 ```sh
 # 1. elan, the Lean toolchain manager (like rustup)
 curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh
+source ~/.elan/env      # or open a new shell, so `lean` and `lake` are on your PATH
 
 # 2. clone and build — elan reads lean-toolchain and fetches 4.35 automatically
 git clone https://github.com/cicorias/formal-software-verification

@@ -15,8 +15,9 @@ for reading (Stage 10). Reasons:
 
 * **One language for the machine and the proofs.** Our RISC-V model in Stage 5
   is ordinary Lean code. You can `#eval` it, single-step it, disassemble with
-  it, *and* prove theorems about it, in the same file. In Rocq you'd write the
-  model, then extract to OCaml to run it.
+  it, *and* prove theorems about it, in the same file. Rocq can evaluate it
+  too (`Compute`, `vm_compute`), but running a model as a fast program usually
+  means extracting it to OCaml.
 * **Tooling.** One install (`elan`), a fast language server, an infoview that
   shows the proof state as you move the cursor. That feedback loop matters
   more than anything else when learning.
@@ -48,8 +49,8 @@ verification, and bad for understanding what the article's 600k-line proofs
 Three things will feel strange:
 
 1. **Nothing mutates.** You never change a value; you build a new one. The
-   compiler reuses memory in place when it can prove nobody else holds a
-   reference, so it's less wasteful than it sounds.
+   runtime reuses memory in place when a value's reference count shows nobody
+   else holds it, so it's less wasteful than it sounds.
 2. **Every function terminates.** Lean must be able to see that recursion gets
    smaller. This isn't pedantry: if `def bogus : False := bogus` were allowed,
    you could "prove" anything, and the whole system would be worthless. To

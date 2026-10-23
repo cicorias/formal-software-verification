@@ -1,9 +1,12 @@
 {
   "frozen": {
-    "Lab/Spec.lean": "8c9eca16859d11d2f034ab92e24c38859ad0b887c289745b6440d370a8a3802c",
-    "Lab/Audit.lean": "5be7a488acc2c7d7d1f8abc492e5080fb6188dbb1591d40ad91094ffd5608bef",
-    "Metal/S05_Machine.lean": "502e24960ea1f83d28858de0041b41f7681986800aff2784086b4a4689a80319",
-    "Metal/Guard.lean": "eb1d6daec0463c5f293cfe0a9aa61157dbce16ab4034264544b4eeda07225002"
+    "Lab/Spec.lean": "00bd3d8da4d637bdd7d3c3324d05274bbf65f9fee6f17de00591d84b4bdeee00",
+    "Lab/Audit.lean": "e5c6a770ab278c7f08654181e3dd8a7514df4cdba284d4fff0e07b821216657a",
+    "Metal/S05_Machine.lean": "75f80ee78e83e3f3948bf51aa7e39c87eae9a9fb43b147d9847e702b534a12e6",
+    "Metal/Guard.lean": "eb1d6daec0463c5f293cfe0a9aa61157dbce16ab4034264544b4eeda07225002",
+    "tools/AxCheck.lean": "3f8a5fe4a6f3fb3c1aba64d9415fdaf706b9ae9df175bcc192261cb52694bb32",
+    "tools/proof_guard.py": "3c49b40bea82a8a22363367f1d0e4525bf60ee8f2bdbcd7ffce6b39b189c309c",
+    "lakefile.toml": "0662e487e82fa69b4dbf0a486d35655be4a3537f489ff283622a68790ec8bc2b"
   },
   "editable": [
     "Lab/Proof.lean"

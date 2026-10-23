@@ -87,15 +87,17 @@ reviewing a semantics. Things to notice:
 * `minusOne` / `firstByte` — sign- vs. zero-extension.
 * `lastByteProg` — clang's `last_byte`, which reads `p[-1]` on empty input:
 
+`#eval trace lastByteProg [10, 20, 30]` prints, in execution order:
 ```
-0x0:  jal ra, 12
-0xc:  add a0, a0, a1
-0x10:  lbu a0, -1(a0)
-0x14:  jalr zero, 0(ra)
-0x4:  addi a7, zero, 93
-0x8:  ecall   ⟹ exit(30)
+0x0: jal ra, 12   ⟹ a0=0x10000 a1=0x3 a2=0x0 a3=0x0
+0xc: add a0, a0, a1   ⟹ a0=0x10003 a1=0x3 a2=0x0 a3=0x0
+0x10: lbu a0, -1(a0)   ⟹ a0=0x1e a1=0x3 a2=0x0 a3=0x0
+0x14: jalr zero, 0(ra)   ⟹ a0=0x1e a1=0x3 a2=0x0 a3=0x0
+0x4: addi a7, zero, 93   ⟹ a0=0x1e a1=0x3 a2=0x0 a3=0x0
+0x8: ecall   ⟹ exit(30)
 ```
-and on `[]`: `CRASH: badRead 0xffff` (one below `inputBase`).
+and on `[]`, `(run lastByteProg 100 (load [])).show` is
+`CRASH: Metal.Fault.badRead 0x0000ffff#32`: address 0xFFFF, one below `inputBase`.
 
 * `example … := by rfl` — **a test inside the prover**: the kernel runs the
   program on one input and checks the result. Exactly as strong as one fuzzer

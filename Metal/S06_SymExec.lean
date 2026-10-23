@@ -148,7 +148,8 @@ hypotheses tell `simp` the pc, the registers and the bounds checks.
 There is no magic here: `sym` is a macro for one `simp` call. When it gets
 stuck, the leftover goal shows you exactly which fact it needed: usually a
 branch condition or a bounds check. You prove that fact separately (with
-`bv_omega`, `omega` or `bv_decide`) and pass it in. -/
+`bv_omega` or `omega`; not `bv_decide`, which adds a native-code axiom) and
+pass it in. -/
 
 syntax "sym" (" [" Lean.Parser.Tactic.simpLemma,* "]")? : tactic
 macro_rules

@@ -34,7 +34,8 @@ theorem wraps : (255#8) + 1 = 0#8 := rfl
     the evaluation directly — slower to start, but no size limits.) -/
 theorem xor_self_all_bytes : ∀ x : BitVec 8, x ^^^ x = 0 := by decide +kernel
 
-/-- Two bytes = 65,536 cases. Still fine. Four bytes would be 4 billion; a
+/-- Two 6-bit values = 4,096 cases. Still fine. Two bytes would be 65,536,
+    four bytes 4 billion; a
     64 MiB input is 256^67108864. That's why the article needs *proofs*:
     beyond tiny domains, enumeration is hopeless, and fuzzing samples a
     vanishing fraction. -/

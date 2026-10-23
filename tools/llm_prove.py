@@ -6,7 +6,7 @@
             +------------- errors / goals ------------+
 
 Claude sees the frozen statement, the machine model, the proof library and
-one worked proof; it writes a complete `Lab/Proof.lean`; we run the guard;
+two worked proofs; it writes a complete `Lab/Proof.lean`; we run the guard;
 on rejection we send back the guard's output and ask for a fix. Nothing
 Claude writes is trusted: the guard decides.
 

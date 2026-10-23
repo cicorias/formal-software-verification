@@ -1,0 +1,27 @@
+[env]
+ELAN_HOME = "{{ get_env(name='ELAN_HOME', default=env.HOME ~ '/.elan') }}"
+_.path = ["{{ env.ELAN_HOME }}/bin"]
+
+[tasks.elan]
+description = "Install elan if missing; Lean is selected by lean-toolchain"
+shell = "bash -euo pipefail -c"
+run = """
+if [ ! -x "$ELAN_HOME/bin/elan" ]; then
+  curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- -y --default-toolchain none --no-modify-path
+fi
+elan --version
+"""
+
+[tasks.build]
+description = "Set up elan and build all lessons and solutions"
+alias = "setup"
+depends = ["elan"]
+run = "lake build"
+
+[tasks.quickstart]
+description = "Build the course, install the Lean 4 extension, and open VS Code"
+depends = ["build"]
+run = [
+  "code --install-extension leanprover.lean4",
+  "code .",
+]

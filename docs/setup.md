@@ -7,7 +7,7 @@ for Stage 10; a C compiler only for the `c/` demos.
 
 ```sh
 # 1. elan, the Lean toolchain manager (like rustup)
-curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh
+curl https://elan.lean-lang.org/elan-init.sh -sSf | sh
 source ~/.elan/env      # or open a new shell, so `lean` and `lake` are on your PATH
 
 # 2. clone and build — elan reads lean-toolchain and fetches 4.35 automatically
@@ -23,6 +23,19 @@ lake build            # lessons + solutions; ~1 minute the first time
 
 There is **no Mathlib** dependency: everything builds against Lean's core and
 standard library, so there's nothing big to download.
+
+### Using mise
+
+After cloning the repo, run `mise trust` followed by `mise run setup`. The
+`mise.toml` adds `${ELAN_HOME:-$HOME/.elan}/bin` to PATH, installs elan if missing
+using the installer above (non-interactively, without modifying your shell
+profile), and runs `lake build`. elan downloads the toolchain pinned in
+`lean-toolchain`; the installer does not install a separate default toolchain.
+
+`mise run quickstart` also installs the `leanprover.lean4` extension and opens
+the repo in VS Code (requires `code` on PATH). For daily commands, activate mise
+in your shell or prefix commands with `mise exec --`, e.g.
+`mise exec -- lake build Exercises`.
 
 ### Alternative: Nix
 

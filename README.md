@@ -61,12 +61,24 @@ Also: [setup](docs/setup.md) · [cheat sheet](docs/cheatsheet.md).
 ## Quick start
 
 ```sh
-curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh   # Lean toolchain manager
+curl https://elan.lean-lang.org/elan-init.sh -sSf | sh   # Lean toolchain manager
 source ~/.elan/env          # or open a new shell, so `lake` is on your PATH
 git clone https://github.com/cicorias/formal-software-verification && cd formal-software-verification
 lake build                  # all lessons + solutions (≈1 min first time)
 code .                      # VS Code + the "lean4" extension; open Metal/S01_LeanForC.lean
 ```
+
+With [mise](https://mise.jdx.dev/) installed, clone the repo first, then run:
+
+```sh
+mise trust
+mise run quickstart          # install elan if needed, build, install lean4, open VS Code
+```
+
+For setup without opening the editor, use `mise run setup` (alias of
+`mise run build`). mise adds elan's bin directory to PATH, so no
+`source ~/.elan/env` is needed; use `mise exec -- lake ...` or activate mise in
+your shell for daily commands. Lean's version comes from `lean-toolchain`.
 
 Then read [docs/00-orientation.md](docs/00-orientation.md). Full details,
 including Nix and Rocq: [docs/setup.md](docs/setup.md).

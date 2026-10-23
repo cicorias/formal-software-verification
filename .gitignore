@@ -1,0 +1,15 @@
+.lake/
+*.olean
+*.ilean
+# Rocq build products
+*.vo
+*.vok
+*.vos
+*.glob
+.*.aux
+.lia.cache
+# C build products
+c/build/
+__pycache__/
+# llm_prove.py backup of the lab stub
+Lab/*.orig

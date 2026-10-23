@@ -1,0 +1,21 @@
+name = "metal"
+version = "0.1.0"
+defaultTargets = ["Metal", "Solutions"]
+
+# Lessons: worked, fully proved, heavily commented. Read these.
+[[lean_lib]]
+name = "Metal"
+
+# Your workspace: every `sorry` is a hole for you to fill.
+# Build with `lake build Exercises` and watch the sorry warnings go away.
+[[lean_lib]]
+name = "Exercises"
+
+# Reference solutions. Built in CI to prove they are complete.
+[[lean_lib]]
+name = "Solutions"
+
+# Stage 9 lab: a frozen statement, a proof for an LLM to write, and an audit.
+# Build the audit with `lake build Lab.Audit`, or run `python3 tools/proof_guard.py`.
+[[lean_lib]]
+name = "Lab"

@@ -1,0 +1,12 @@
+{
+  "frozen": {
+    "Lab/Spec.lean": "8c9eca16859d11d2f034ab92e24c38859ad0b887c289745b6440d370a8a3802c",
+    "Lab/Audit.lean": "5be7a488acc2c7d7d1f8abc492e5080fb6188dbb1591d40ad91094ffd5608bef",
+    "Metal/S05_Machine.lean": "502e24960ea1f83d28858de0041b41f7681986800aff2784086b4a4689a80319",
+    "Metal/Guard.lean": "eb1d6daec0463c5f293cfe0a9aa61157dbce16ab4034264544b4eeda07225002"
+  },
+  "editable": [
+    "Lab/Proof.lean"
+  ],
+  "audit_target": "Lab.Audit"
+}

@@ -1,0 +1,5 @@
+# Docker build context filter for .devcontainer/Dockerfile (BuildKit reads
+# <Dockerfile>.dockerignore). The context is the repo root, but the image only
+# needs lean-toolchain; everything else is bind-mounted at run time.
+*
+!lean-toolchain

@@ -1,0 +1,58 @@
+// Proofs to the Metal: Lean dev container (Stages 0-9). The DEFAULT config:
+// Codespaces and VS Code use it unless you pick another.
+// For Stage 10 (Rocq) pick .devcontainer/rocq/devcontainer.json instead. Both are explained in
+// .devcontainer/README.md and docs/setup.md.
+{
+  "name": "Proofs to the Metal: Lean (Stages 0-9)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "target": "lean"
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  // Claude Code inside the container: the tutor (CLAUDE.md) and the Stage 9 lab
+  // (fv-prove skill). Inside the container, build-time Lean code the agent writes
+  // can't touch your host.
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+
+  "mounts": [
+    // Lake's build output lives on a volume: fast on macOS/Windows, and separate
+    // from any .lake/ you build on the host.
+    "source=fsv-lake-${devcontainerId},target=${containerWorkspaceFolder}/.lake,type=volume",
+    // Claude Code's login and settings survive container rebuilds.
+    "source=fsv-claude-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  ],
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  // Long proofs keep the Lean kernel busy (docs/06, "When the kernel is slow");
+  // with too little memory that looks like a hang. Codespaces picks a machine
+  // size from these. Locally, give Docker Desktop at least 8 GB.
+  "hostRequirements": { "cpus": 2, "memory": "8gb", "storage": "16gb" },
+
+  // Stage 9 only (tools/llm_prove.py). Codespaces offers to set it when the
+  // codespace is created. For local containers see docs/setup.md.
+  "secrets": {
+    "ANTHROPIC_API_KEY": {
+      "description": "Optional: only tools/llm_prove.py (Stage 9) needs it. It costs money per run.",
+      "documentationUrl": "https://docs.claude.com/en/api/getting-started"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["leanprover.lean4"],
+      "settings": {
+        "files.eol": "\n"
+      }
+    },
+    "codespaces": {
+      "openFiles": ["docs/00-orientation.md", "Metal/S01_LeanForC.lean"]
+    }
+  }
+}

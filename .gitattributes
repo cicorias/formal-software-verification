@@ -1,0 +1,8 @@
+# Check out text files with LF everywhere, Windows included.
+#
+# Lab/guard.json pins the frozen lab files by sha256. A CRLF checkout (e.g. Git
+# for Windows with core.autocrlf=true) changes their bytes, and
+# tools/proof_guard.py then reports every frozen file as "differs from the
+# reviewed version". Shell scripts and Makefiles also break with CRLF, inside
+# the dev container too.
+* text=auto eol=lf

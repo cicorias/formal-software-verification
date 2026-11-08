@@ -1,10 +1,30 @@
+# mise tasks for "Proofs to the Metal".  `mise tasks` lists them in course order.
+#
+# Naming: <N>-<area>:<action>. The leading digit sorts the list.
+#   0-setup      one-time setup (host only; the dev container comes ready)
+#   1-lean       Stages 1-9: lessons, exercises, single files
+#   2-c          Stages 3, 5-7: the C side (fuzzers, RISC-V assembly)
+#   3-lab        Stage 9: the frozen-statement lab and the LLM loop
+#   4-rocq       Stage 10: Rocq (needs Rocq 9; use the Rocq dev container)
+#   7-container  dev container images and shells (needs Docker, plus npx for up/shell)
+#   8-ci         run locally what GitHub Actions checks
+#
+# Pass extra arguments after the task name, e.g.
+#   mise run 1-lean:stage S03_Specs
+#   mise run 3-lab:llm-prove --rounds 4
+#
+# The old names still work as aliases: elan, setup, build, quickstart.
+
 [env]
 ELAN_HOME = "{{ get_env(name='ELAN_HOME', default=env.HOME ~ '/.elan') }}"
 _.path = ["{{ env.ELAN_HOME }}/bin"]
 
-[tasks.elan]
-description = "Install elan if missing; Lean is selected by lean-toolchain"
+# ---------------------------------------------------------------- 0 setup ---
+
+[tasks."0-setup:elan"]
 shell = "bash -euo pipefail -c"
+description = "[setup] Install elan if missing (Lean's version comes from lean-toolchain)"
+alias = "elan"
 run = """
 if [ ! -x "$ELAN_HOME/bin/elan" ]; then
   curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- -y --default-toolchain none --no-modify-path
@@ -12,16 +32,170 @@ fi
 elan --version
 """
 
-[tasks.build]
-description = "Set up elan and build all lessons and solutions"
-alias = "setup"
-depends = ["elan"]
+[tasks."0-setup:build"]
+description = "[setup] Install elan if needed, then build lessons + solutions. Run this first"
+alias = ["setup", "build"]
+depends = ["0-setup:elan"]
 run = "lake build"
 
-[tasks.quickstart]
-description = "Build the course, install the Lean 4 extension, and open VS Code"
-depends = ["build"]
+[tasks."0-setup:vscode"]
+description = "[setup] Build, install the lean4 VS Code extension, open the repo in VS Code"
+alias = "quickstart"
+depends = ["0-setup:build"]
 run = [
   "code --install-extension leanprover.lean4",
   "code .",
 ]
+
+# ---------------------------------------------------- 1 lean (Stages 1-9) ---
+
+[tasks."1-lean:build"]
+description = "[Stages 1-9] Build lessons (Metal/) + solutions; must stay sorry-free"
+run = "lake build"
+
+[tasks."1-lean:exercises"]
+description = "[Stages 1-9] Build your workspace; each remaining hole shows as a sorry warning"
+run = "lake build Exercises"
+
+[tasks."1-lean:stage"]
+description = "[Stages 1-9] Build one stage's exercises, e.g. `mise run 1-lean:stage S03_Specs`"
+usage = 'arg "<stage>" help="Exercise module, e.g. S03_Specs (see Exercises/)"'
+run = 'lake build "Exercises.${usage_stage}"'
+
+[tasks."1-lean:file"]
+description = "[Stages 1-9] Check one .lean file outside the build (scratch files, etc.)"
+usage = 'arg "<file>" help="Path to a .lean file"'
+run = 'lake env lean "${usage_file}"'
+
+# ------------------------------------------------ 2 c (Stages 3, 5-7) -------
+
+[tasks."2-c:demo"]
+description = "[Stages 3, 7] Random fuzzing vs. the bugs: what it finds, and what it misses (ASan)"
+run = "make -C c demo"
+
+[tasks."2-c:asm"]
+description = "[Stages 5-7] Compile the C to RISC-V assembly (clang, rv32i) into c/build/"
+run = "make -C c asm"
+
+[tasks."2-c:libfuzzer"]
+description = "[Stage 3, optional] Build coverage-guided libFuzzer targets (clang + libFuzzer runtime)"
+run = "make -C c libfuzzer"
+
+# ------------------------------------------------------ 3 lab (Stage 9) -----
+
+[tasks."3-lab:guard"]
+description = "[Stage 9] Audit Lab/Proof.lean: frozen files, banned constructs, kernel, axioms"
+run = "python3 tools/proof_guard.py"
+
+[tasks."3-lab:llm-prove"]
+description = "[Stage 9] Let Claude attempt the lab via the API (needs ANTHROPIC_API_KEY; costs money)"
+run = "python3 tools/llm_prove.py"
+
+# ----------------------------------------------------- 4 rocq (Stage 10) ----
+
+[tasks."4-rocq:check"]
+shell = "bash -euo pipefail -c"
+description = "[Stage 10] Check the Rocq files (needs Rocq 9; use the Rocq dev container)"
+run = """
+if ! command -v rocq >/dev/null; then
+  echo "rocq not found. Stage 10 needs Rocq 9.x + its stdlib. Easiest: open the" >&2
+  echo "'Lean + Rocq' dev container (.devcontainer/rocq). Native install: docs/setup.md." >&2
+  exit 1
+fi
+make -C rocq
+"""
+
+# ---------------------------------------------------- 7 dev containers ------
+# image-*: plain `docker build` of the two Dockerfile targets (a quick check
+# that the image builds). up-*/shell-*: the real dev container (same config VS
+# Code and Codespaces use) through the devcontainer CLI, fetched with npx.
+
+[tasks."7-container:image-lean"]
+description = "[container] Build the Lean image (Dockerfile target `lean`, Stages 0-9)"
+run = "docker build -f .devcontainer/Dockerfile --target lean -t fsv-dev:lean ."
+
+[tasks."7-container:image-rocq"]
+description = "[container] Build the Lean + Rocq image (target `rocq`; opam adds a few minutes)"
+run = "docker build -f .devcontainer/Dockerfile --target rocq -t fsv-dev:rocq ."
+
+[tasks."7-container:up-lean"]
+description = "[container] Create/start the Lean dev container (.devcontainer/devcontainer.json)"
+run = "npx --yes @devcontainers/cli up --workspace-folder . --config .devcontainer/devcontainer.json"
+
+[tasks."7-container:up-rocq"]
+description = "[container] Create/start the Lean + Rocq dev container (.devcontainer/rocq/)"
+run = "npx --yes @devcontainers/cli up --workspace-folder . --config .devcontainer/rocq/devcontainer.json"
+
+[tasks."7-container:shell-lean"]
+description = "[container] Open a shell in the Lean dev container (starts it if needed)"
+depends = ["7-container:up-lean"]
+raw = true
+run = "npx --yes @devcontainers/cli exec --workspace-folder . --config .devcontainer/devcontainer.json bash -l"
+
+[tasks."7-container:shell-rocq"]
+description = "[container] Open a shell in the Lean + Rocq dev container (starts it if needed)"
+depends = ["7-container:up-rocq"]
+raw = true
+run = "npx --yes @devcontainers/cli exec --workspace-folder . --config .devcontainer/rocq/devcontainer.json bash -l"
+
+# ------------------------------------------------------------- 8 ci ---------
+# Mirrors .github/workflows/ci.yml. Keep the AxCheck theorem list in sync.
+
+[tasks."8-ci:lean"]
+shell = "bash -euo pipefail -c"
+description = "[ci] CI's Lean job: build all, no sorry in lessons/solutions, axiom audit, lab guard"
+run = """
+lake build Metal Solutions Exercises Lab.Spec Lab.Proof
+echo "== lessons and solutions contain no sorry"
+if lake build Metal Solutions 2>&1 | tee /dev/stderr | grep -q 'declaration uses `sorry`'; then
+  echo "FAIL: a lesson or solution uses sorry" >&2; exit 1
+fi
+echo "== headline theorems use only the standard axioms"
+lake env lean --run tools/AxCheck.lean Solutions \
+  Metal.sum_never_crashes Metal.Trust.sum_correct Metal.buggy_violates_spec \
+  Metal.S03.decode_encode Metal.S07Solution.fixed_never_crashes Metal.S08Ex.e8_2 \
+  Metal.S06Ex.e6_1 Metal.S06Ex.e6_3 Metal.S06Ex.e6_4
+echo "== lab frozen files are intact"
+python3 tools/proof_guard.py --frozen-only
+echo "== the guard rejects the unfinished lab (sanity check)"
+if python3 tools/proof_guard.py >/dev/null 2>&1; then
+  echo "FAIL: guard accepted the lab. Expected only while Lab/Proof.lean is the sorry stub;" >&2
+  echo "      if you've solved the lab, this check is supposed to fail." >&2
+  exit 1
+fi
+echo "OK: CI Lean checks pass"
+"""
+
+[tasks."8-ci:c"]
+description = "[ci] CI's C job: RISC-V assembly + the fuzzing demo"
+depends = ["2-c:asm", "2-c:demo"]
+run = "echo 'OK: CI C checks pass'"
+
+[tasks."8-ci:rocq"]
+description = "[ci] CI's Rocq job (Rocq dev container only)"
+depends = ["4-rocq:check"]
+run = "echo 'OK: CI Rocq checks pass'"
+
+[tasks."8-ci:all"]
+description = "[ci] Lean + C jobs. In the Rocq container, also run 8-ci:rocq"
+depends = ["8-ci:lean", "8-ci:c"]
+run = "echo 'OK: all CI checks for Lean and C pass'"
+
+# ----------------------------------------------------------- 9 clean -------
+
+[tasks."9-clean:lean"]
+description = "[clean] Delete Lake's build output (.lake/build)"
+run = "lake clean"
+
+[tasks."9-clean:c"]
+description = "[clean] Delete c/build/"
+run = "make -C c clean"
+
+[tasks."9-clean:rocq"]
+description = "[clean] Delete Rocq build products"
+run = "make -C rocq clean"
+
+[tasks."9-clean:all"]
+description = "[clean] All of the above"
+depends = ["9-clean:lean", "9-clean:c", "9-clean:rocq"]
+run = "true"

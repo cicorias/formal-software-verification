@@ -1,0 +1,47 @@
+// Proofs to the Metal: Lean + Rocq dev container (all stages, including 10).
+// The same image as .devcontainer/devcontainer.json plus Rocq 9 (Dockerfile target "rocq").
+// The first build also compiles Rocq with opam (a few extra minutes); cached after that.
+// Only pick this one if you're doing Stage 10.
+{
+  "name": "Proofs to the Metal: Lean + Rocq (all stages, incl. 10)",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "../..",
+    "target": "rocq"
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "lts" },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+
+  "mounts": [
+    "source=fsv-lake-${devcontainerId},target=${containerWorkspaceFolder}/.lake,type=volume",
+    "source=fsv-claude-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  ],
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "hostRequirements": { "cpus": 2, "memory": "8gb", "storage": "20gb" },
+
+  "secrets": {
+    "ANTHROPIC_API_KEY": {
+      "description": "Optional: only tools/llm_prove.py (Stage 9) needs it. It costs money per run.",
+      "documentationUrl": "https://docs.claude.com/en/api/getting-started"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["leanprover.lean4", "rocq-prover.vsrocq"],
+      "settings": {
+        "files.eol": "\n"
+      }
+    },
+    "codespaces": {
+      "openFiles": ["docs/10-rocq-and-the-real-thing.md", "rocq/Basics.v"]
+    }
+  }
+}

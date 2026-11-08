@@ -11,8 +11,14 @@ theorem-labs' code without the syntax getting in the way.
 | `Exercises.v` | Three exercises (`Admitted.` = Lean's `sorry`). |
 | `Solutions.v` | Their solutions. |
 
-Build: `make -C rocq` (needs Rocq 9.x and its standard library, the `rocq-stdlib`
-opam package). If `rocq` says *Cannot find a physical path bound to logical path
+**Easiest:** open the repo in the **Lean + Rocq dev container**
+(`.devcontainer/rocq/devcontainer.json`; in VS Code, *Dev Containers: Reopen in
+Container* → "Proofs to the Metal: Lean + Rocq"). It has Rocq 9.1, the stdlib
+and the vsrocq extension; run `mise run 4-rocq:check`. The default dev container
+is Lean only and has no Rocq. See [.devcontainer/README.md](../.devcontainer/README.md).
+
+Build natively: `make -C rocq` (needs Rocq 9.x and its standard library, the `rocq-stdlib`
+opam package; install steps in [docs/setup.md](../docs/setup.md#rocq-stage-10-only)). If `rocq` says *Cannot find a physical path bound to logical path
 … Stdlib*, point it at the library, e.g. with nix:
 `ROCQPATH=$HOME/.nix-profile/lib/coq/9.1/user-contrib make -C rocq`.
 

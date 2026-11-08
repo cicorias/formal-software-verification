@@ -60,6 +60,11 @@ Also: [setup](docs/setup.md) · [cheat sheet](docs/cheatsheet.md).
 
 ## Quick start
 
+Pick one of three ways in. They all end with the same commands: `mise tasks`
+lists them in course order.
+
+**1. Native (Linux/macOS, quickest):**
+
 ```sh
 curl https://elan.lean-lang.org/elan-init.sh -sSf | sh   # Lean toolchain manager
 source ~/.elan/env          # or open a new shell, so `lake` is on your PATH
@@ -68,20 +73,41 @@ lake build                  # all lessons + solutions (≈1 min first time)
 code .                      # VS Code + the "lean4" extension; open Metal/S01_LeanForC.lean
 ```
 
-With [mise](https://mise.jdx.dev/) installed, clone the repo first, then run:
+**2. Native with [mise](https://mise.jdx.dev/):** clone the repo, then
 
 ```sh
 mise trust
-mise run quickstart          # install elan if needed, build, install lean4, open VS Code
+mise run 0-setup:vscode      # install elan if needed, build, install lean4, open VS Code
+                             # (or 0-setup:build to skip the editor; old names: quickstart, setup)
 ```
 
-For setup without opening the editor, use `mise run setup` (alias of
-`mise run build`). mise adds elan's bin directory to PATH, so no
-`source ~/.elan/env` is needed; use `mise exec -- lake ...` or activate mise in
-your shell for daily commands. Lean's version comes from `lean-toolchain`.
+mise adds elan's bin directory to PATH, so no `source ~/.elan/env` is needed.
+
+**3. Dev container (no local installs):**
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/cicorias/formal-software-verification)
+
+Or with Docker locally: VS Code → *Dev Containers: Reopen in Container*. The
+**default container is Lean only** and covers Stages 0–9, C toolchain included.
+When you reach Stage 10, switch to the opt-in **Lean + Rocq** container
+([open in Codespaces](https://codespaces.new/cicorias/formal-software-verification?devcontainer_path=.devcontainer/rocq/devcontainer.json)).
+Its first build also compiles Rocq with opam, which adds a few minutes. Details:
+[.devcontainer/README.md](.devcontainer/README.md).
+
+### The command menu
+
+```text
+# abridged: run `mise tasks` for the full list
+0-setup:build      install elan, build lessons + solutions (run first; native only)
+1-lean:exercises   your remaining sorrys            1-lean:stage S03_Specs   one stage
+2-c:demo           fuzzers vs. the bugs (Stage 3)   2-c:asm                  C → RISC-V (Stages 5–7)
+3-lab:guard        audit the Stage 9 lab            3-lab:llm-prove          let Claude try it ($)
+4-rocq:check       Stage 10 Rocq files (Rocq container)
+7-container:*      build/open the dev containers    8-ci:*   run CI locally   9-clean:*
+```
 
 Then read [docs/00-orientation.md](docs/00-orientation.md). Full details,
-including Nix and Rocq: [docs/setup.md](docs/setup.md).
+including Nix, Rocq and every mise task: [docs/setup.md](docs/setup.md).
 
 ## How to work through it
 
@@ -110,6 +136,8 @@ c/             the C sources, a random fuzzer, `make asm` / `make demo`
 rocq/          Stage 10: Basics, a relational machine, exercises (Rocq 9)
 tools/         proof_guard.py (accept/reject a proof), llm_prove.py (API loop demo)
 .claude/       the fv-prove skill for Claude Code;  CLAUDE.md: repo guide for Claude
+.devcontainer/ dev containers: Lean (default, Stages 0-9) and rocq/ (opt-in, Stage 10)
+mise.toml      every command as an ordered task: `mise tasks`
 ```
 
 ## What's verified, concretely

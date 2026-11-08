@@ -13,12 +13,16 @@ much larger scale" (Oct 2026). Lean 4 (v4.35, **no Mathlib**), plus a Rocq bridg
 - `c/` — the C sources, a random fuzzer, a Makefile (`make asm`, `make demo`).
 - `rocq/` — Stage 10: the same ideas in Rocq.
 - `tools/proof_guard.py` — decides whether a proof is acceptable. `tools/llm_prove.py` — API loop demo.
+- `.devcontainer/` — dev containers from one Dockerfile: `devcontainer.json` (default, Lean, Stages 0–9)
+  and `rocq/devcontainer.json` (opt-in, Lean + Rocq, Stage 10). `mise.toml` — every command as an ordered task.
 
 ## Commands
 - `lake build` — lessons + solutions (must be sorry-free; CI enforces).
 - `lake build Exercises` — lists remaining `sorry`s.
 - `python3 tools/proof_guard.py` — audit `Lab/Proof.lean`.
 - `make -C rocq` — check the Rocq files.
+- `mise tasks` — the same commands as ordered tasks (`1-lean:*`, `2-c:*`, `3-lab:*`, `4-rocq:*`, `8-ci:*`, …).
+  Rocq is only installed in the Rocq dev container; in the default one `4-rocq:check` fails by design.
 
 ## When tutoring
 The learner is a senior C/low-level engineer with modest math. Prefer C and

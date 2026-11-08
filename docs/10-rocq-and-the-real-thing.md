@@ -40,7 +40,8 @@ Stage 6-style proof in Rocq, written in the relational style the real model uses
 | `#eval` | `Compute` / `Eval vm_compute in` | Running code is less central in Rocq |
 | `BitVec n` | `bv n` (stdpp), `word` (coqutil) | theorem-labs uses `bv` |
 
-Do the three exercises in `rocq/Exercises.v` (`make -C rocq`). They're E2.9,
+Do the three exercises in `rocq/Exercises.v` (`make -C rocq`, or `mise run 4-rocq:check`;
+no local Rocq? use the Lean + Rocq dev container, see [setup](setup.md#rocq-stage-10-only)). They're E2.9,
 E2.10, and "prove a variant program safe", in Rocq.
 
 ## Part 2 — Functional vs. relational semantics

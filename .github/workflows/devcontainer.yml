@@ -1,0 +1,42 @@
+name: devcontainer
+
+# Keeps the dev container images working. Runs only when something they depend
+# on changes; the main CI (ci.yml) is unaffected.
+on:
+  push:
+    paths:
+      - ".devcontainer/**"
+      - "lean-toolchain"
+      - "mise.toml"
+      - ".github/workflows/devcontainer.yml"
+  pull_request:
+    paths:
+      - ".devcontainer/**"
+      - "lean-toolchain"
+      - "mise.toml"
+      - ".github/workflows/devcontainer.yml"
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  image:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - config: .devcontainer/devcontainer.json
+            check: mise run 8-ci:all
+          - config: .devcontainer/rocq/devcontainer.json
+            check: mise run 4-rocq:check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start the dev container (runs post-create.sh)
+        run: npx --yes @devcontainers/cli up --workspace-folder . --config ${{ matrix.config }}
+      - name: Course checks inside the container
+        run: >
+          npx --yes @devcontainers/cli exec --workspace-folder . --config ${{ matrix.config }}
+          bash -lc '${{ matrix.check }}'

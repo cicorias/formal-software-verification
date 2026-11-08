@@ -106,11 +106,55 @@ them in the order you'll need them:
 | `3-lab` | `guard`, `llm-prove` | 9 |
 | `4-rocq` | `check` | 10 |
 | `7-container` | `image-lean`, `image-rocq`, `up-lean`, `up-rocq`, `shell-lean`, `shell-rocq` | dev containers |
-| `8-ci` | `lean`, `c`, `rocq`, `all` | what GitHub Actions checks |
+| `8-ci` | `lean`, `c`, `rocq`, `secrets`, `all` | what GitHub Actions checks |
 | `9-clean` | `lean`, `c`, `rocq`, `all` | delete build output |
 
 Arguments go after the task name: `mise run 1-lean:stage S06_NoCrash`,
 `mise run 3-lab:llm-prove --rounds 4`.
+
+## Secrets and API keys
+
+**The course needs no secrets.** Lessons, exercises, the C demos, the proof
+guard and Rocq all run without any. There is exactly one optional variable:
+
+| Variable | Used by | Needed for | Where to get it |
+|---|---|---|---|
+| `ANTHROPIC_API_KEY` | `tools/llm_prove.py` (`mise run 3-lab:llm-prove`) | Stage 9's API-loop demo only. **Costs money per run.** | [console.anthropic.com → API keys](https://console.anthropic.com/settings/keys) |
+
+Claude Code (`claude`), the tutor and the `fv-prove` skill, doesn't use this
+variable. It has its own login (`claude`, then follow the prompt).
+
+**Where to put it.** Pick one:
+
+- **`.env` file (recommended):** `cp .env.example .env`, then uncomment and fill
+  in the line. `.env` is gitignored. `mise.toml` loads it into every `mise run`
+  task, natively and in the dev containers (the repo is mounted, so the same
+  file works in both), and mise redacts the value in its output.
+- **Shell:** `export ANTHROPIC_API_KEY=…`. Needed if you run
+  `python3 tools/llm_prove.py` directly rather than through mise.
+- **Codespaces:** add a Codespaces secret named `ANTHROPIC_API_KEY`. The dev
+  container declares it, so you're offered the chance to set it when you
+  create the codespace.
+- An `ant auth login` profile also works for `llm_prove.py`.
+
+**Two gotchas:**
+
+- In `.env`, keep a line **commented out** unless it has a real value. `.env`
+  takes precedence over your shell and over Codespaces secrets, and a blank
+  `ANTHROPIC_API_KEY=` *unsets* the key you set elsewhere.
+- With mise activated in your shell, `.env` variables are in every program's
+  environment, Claude Code included. Claude Code may then bill to the API key
+  instead of your subscription. Anything running in the dev container, including
+  an agent, can also read `.env`: keep only keys you're willing to expose there,
+  and prefer a key with a low spending limit.
+
+**Keeping them out of git.** `.gitignore` covers `.env` and `.env.*` (except
+`.env.example`) and `.claude/settings.local.json`. CI scans every commit with
+gitleaks (`secrets` job in `.github/workflows/ci.yml`), and
+`mise run 8-ci:secrets` runs the same scan locally over all history plus your
+staged and unstaged changes. It doesn't scan your gitignored `.env`, so a real
+key there won't trip it. If a key ever does get committed, **revoke it in the
+console first**: deleting the file doesn't remove it from history.
 
 ## Daily commands
 

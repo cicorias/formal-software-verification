@@ -14,10 +14,16 @@
 #   mise run 3-lab:llm-prove --rounds 4
 #
 # The old names still work as aliases: elan, setup, build, quickstart.
+#
+# Secrets: none are needed except ANTHROPIC_API_KEY for 3-lab:llm-prove. Put it
+# in .env (copy .env.example; .env is gitignored). See docs/setup.md, "Secrets".
 
 [env]
 ELAN_HOME = "{{ get_env(name='ELAN_HOME', default=env.HOME ~ '/.elan') }}"
 _.path = ["{{ env.ELAN_HOME }}/bin"]
+# Optional secrets (only ANTHROPIC_API_KEY, Stage 9). A missing .env is fine;
+# values are redacted in mise's output. Template: .env.example.
+_.file = { path = ".env", redact = true }
 
 # ---------------------------------------------------------------- 0 setup ---
 
@@ -175,6 +181,17 @@ run = "echo 'OK: CI C checks pass'"
 description = "[ci] CI's Rocq job (Rocq dev container only)"
 depends = ["4-rocq:check"]
 run = "echo 'OK: CI Rocq checks pass'"
+
+[tasks."8-ci:secrets"]
+description = "[ci] Scan git history + staged/unstaged changes for secrets (gitleaks via Docker; ignores your .env)"
+shell = "bash -euo pipefail -c"
+run = """
+gl() { docker run --rm -v "$PWD:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact "$@"; }
+echo "== every commit";        gl
+echo "== staged changes";      gl --pre-commit --staged
+echo "== unstaged changes";    gl --pre-commit
+echo "OK: no secrets in history or pending changes (gitignored files like .env are not scanned)"
+"""
 
 [tasks."8-ci:all"]
 description = "[ci] Lean + C jobs. In the Rocq container, also run 8-ci:rocq"

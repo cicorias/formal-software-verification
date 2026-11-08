@@ -71,10 +71,14 @@ mise run 4-rocq:check               # Stage 10 (Rocq container only)
 - **Claude Code** is installed (`claude`). Log in once; `~/.claude` lives on a
   volume, so the login survives rebuilds. The container keeps build-time Lean
   code the agent writes away from your host, which matters in Stage 9.
-- **`ANTHROPIC_API_KEY`** is only for `tools/llm_prove.py`, which costs money per
-  run. In Codespaces, add it as a Codespaces secret (you're prompted when you
-  create the codespace). Locally, `export ANTHROPIC_API_KEY=…` in the container
-  terminal. It is deliberately not copied in from your host environment.
+- **`ANTHROPIC_API_KEY`** is only for `tools/llm_prove.py` (Stage 9), which
+  costs money per run. Nothing else needs a secret. Easiest: `cp .env.example .env`
+  on the host or in the container (same mounted file), then uncomment the line;
+  `mise run 3-lab:llm-prove` picks it up. In Codespaces you can add it as a
+  Codespaces secret instead (you're prompted when you create the codespace). It
+  is deliberately not copied in from your host environment: an empty value
+  would override a Codespaces secret. Full details:
+  [docs/setup.md → Secrets and API keys](../docs/setup.md#secrets-and-api-keys).
 - **"dubious ownership" / `git archive` failed.** `post-create.sh` marks the
   workspace as a git `safe.directory`. If you skipped it, run
   `git config --global --add safe.directory "$PWD"`.

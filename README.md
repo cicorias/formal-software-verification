@@ -103,8 +103,12 @@ Its first build also compiles Rocq with opam, which adds a few minutes. Details:
 2-c:demo           fuzzers vs. the bugs (Stage 3)   2-c:asm                  C → RISC-V (Stages 5–7)
 3-lab:guard        audit the Stage 9 lab            3-lab:llm-prove          let Claude try it ($)
 4-rocq:check       Stage 10 Rocq files (Rocq container)
-7-container:*      build/open the dev containers    8-ci:*   run CI locally   9-clean:*
+7-container:*      build/open the dev containers    8-ci:*   run CI locally (incl. secrets scan)   9-clean:*
 ```
+
+**Secrets:** none are needed. The one optional key, `ANTHROPIC_API_KEY`, is
+only for Stage 9's paid API demo. Copy [`.env.example`](.env.example) to `.env`
+(gitignored) and see [docs/setup.md → Secrets and API keys](docs/setup.md#secrets-and-api-keys).
 
 Then read [docs/00-orientation.md](docs/00-orientation.md). Full details,
 including Nix, Rocq and every mise task: [docs/setup.md](docs/setup.md).

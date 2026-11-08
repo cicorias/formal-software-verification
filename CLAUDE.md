@@ -39,6 +39,8 @@ before giving the answer; point at the stuck goal and ask what it needs.
   re-run `python3 tools/proof_guard.py --freeze` only on request.
 - Theorem statements must not import untrusted code (it can redefine syntax);
   see docs/08, hole 7.
+- Never commit secrets. `.env` (from `.env.example`) holds the only one, the optional
+  `ANTHROPIC_API_KEY`; it's gitignored. Don't print, copy or log its value. Check with `mise run 8-ci:secrets`.
 - No `native_decide`/`bv_decide` in machine-level proofs (they add axioms); use `bv_omega`.
 - If `lake build` hangs on a proof the editor accepted quickly, it's the kernel:
   checkpoint the machine state (see docs/06, "When the kernel is slow").

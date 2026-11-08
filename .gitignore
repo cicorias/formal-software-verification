@@ -13,3 +13,9 @@ c/build/
 __pycache__/
 # llm_prove.py backup of the lab stub
 Lab/*.orig
+# Secrets: never commit. Copy .env.example to .env (see docs/setup.md, "Secrets").
+.env
+.env.*
+!.env.example
+# Claude Code's per-user settings
+.claude/settings.local.json
